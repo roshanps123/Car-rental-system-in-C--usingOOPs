@@ -1,0 +1,84 @@
+
+
+# Car Rental System
+
+## Overview
+
+The Car Rental System is a comprehensive application developed in C++ to manage car rentals. It utilizes Object-Oriented Programming principles to create a robust system that handles car rentals for customers, employees, and a manager. The system maintains records of cars, customers, employees, and rental transactions.
+
+## Features
+
+- **User Authentication**: Supports registration and login for customers, employees, and a manager.
+- **Car Management**: Allows the manager to add, update, delete, and search for cars in the system.
+- **User Management**: Enables the manager to manage customer and employee records.
+- **Rental Transactions**: Handles renting and returning of cars by customers and employees.
+- **Record Tracking**: Maintains rental history and tracks due dates of rented cars.
+- **Fine Management**: Calculates and manages fines for late returns.
+
+## System Requirements
+
+- C++ Compiler (e.g., GCC, Clang)
+- Standard C++ Library
+- No external dependencies are required.
+
+## Installation
+
+1. Clone the repository or download the source code.
+2. Compile the source code using a C++ compiler. For example:
+   ```
+   g++ -o CarRentalSystem main.cpp
+   ```
+3. Run the compiled application:
+   ```
+   ./CarRentalSystem
+   ```
+
+## Usage
+
+After launching the Car Rental System, the user is presented with options to either log in or register. Based on the user's role (customer, employee, or manager), different functionalities are available.
+
+### For Customers and Employees
+
+- **Login/Register**: Users need to log in or register to access the system.
+- **Rent a Car**: Browse available cars and choose one to rent.
+- **Return a Car**: Return a rented car.
+- **View Rented Cars**: Check the list of cars currently rented.
+- **Clear Dues**: Pay any outstanding fines.
+
+### For Managers
+
+- **Manage Cars**: Add, update, delete, or search for cars in the system.
+- **Manage Users**: Add, update, delete, or search for users in the system.
+- **View Rental History**: Access the full rental history of all cars.
+- **Generate Reports**: (Future Implementation) Generate comprehensive reports about cars and users.
+
+## File Structure
+
+- `main.cpp`: The main entry point of the application.
+- `Car.cpp` / `Car.h`: Defines the Car class and its attributes.
+- `User.cpp` / `User.h`: Defines the User class and derived classes (Customer, Employee, Manager).
+- `RentalManager.cpp` / `RentalManager.h`: Manages rental transactions.
+- `RecordManager.cpp` / `RecordManager.h`: Handles rental records and history.
+- `CarDatabase.cpp` / `CarDatabase.h`: Manages the car database.
+- `UserDatabase.cpp` / `UserDatabase.h`: Manages the user database.
+
+## Development and Contribution
+
+Contributions to the Car Rental System are welcome. Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Implement your changes.
+4. Submit a pull request with a detailed description of your changes.
+
+## License
+
+The project is licensed under [LICENSE NAME].
+
+## Contact
+
+For any queries or contributions, please contact [CONTACT INFORMATION].
+
+---
+
+**Note**: You can expand each section with more details specific to your project. Make sure to replace placeholders like `[LICENSE NAME]` and `[CONTACT INFORMATION]` with actual information relevant to your project. This README serves as a basic template and should be tailored to fit the specifics of your application.

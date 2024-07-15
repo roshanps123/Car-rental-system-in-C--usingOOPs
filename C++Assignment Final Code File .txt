@@ -1,0 +1,902 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <unordered_map>
+
+class User {
+protected:
+    int id; // New ID attribute
+    std::string name;
+    std::string password;
+    std::string role;  // "customer", "employee", or "manager"
+
+public:
+    // Updated constructor to include the ID parameter
+    User(int id, const std::string& name, const std::string& password, const std::string& role)
+        : id(id), name(name), password(password), role(role) {}
+
+    // Getters for the new and existing attributes
+    int getId() const { return id; }
+    const std::string& getName() const { return name; }
+    const std::string& getPassword() const { return password; }
+    const std::string& getRole() const { return role; }
+
+    // Additional functionalities can be added as needed
+};
+
+class Car {
+private:
+    std::string model;
+    double rentalPrice;
+    bool available;
+  std::string condition;  // New attribute for the condition of the car
+    // Add other details as needed
+
+    // Assuming the rental due date is represented as a string (e.g., "2023-12-31")
+    std::string dueDate;  
+
+public:
+    Car(const std::string& model, double rentalPrice, bool available = true)
+        : model(model), rentalPrice(rentalPrice), available(available) {}
+
+    const std::string& getModel() const { return model; }
+    double getRentalPrice() const { return rentalPrice; }
+    bool isAvailable() const { return available; }
+    void setAvailable(bool newAvailability) { available = newAvailability; }
+
+    void displayInfo() const {
+        std::cout << "Car Model: " << model << ", Rental Price: $" << rentalPrice 
+                  << ", Available: " << (available ? "Yes" : "No") << std::endl;
+    }
+
+class Customer : public User {
+private:
+    std::vector<std::string> rentedCars;  // Models of rented cars
+    double finesDue;
+
+public:
+    // Updated constructor to include ID
+    Customer(int id, const std::string& name, const std::string& password)
+        : User(id, name, password, "customer"), finesDue(0.0) {}
+
+    void rentCar(const std::string& model) {
+        rentedCars.push_back(model);
+        std::cout << "Customer " << name << " rented car: " << model << std::endl;
+    }
+
+    void returnCar(const std::string& model) {
+        auto it = std::find(rentedCars.begin(), rentedCars.end(), model);
+        if (it != rentedCars.end()) {
+            rentedCars.erase(it);
+            std::cout << "Customer " << name << " returned car: " << model << std::endl;
+        } else {
+            std::cout << "Car not found in rented list." << std::endl;
+        }
+    }
+
+    void return_request() {
+        if (!rentedCars.empty()) {
+            // For simplicity, handling return request for the last rented car
+            std::string model = rentedCars.back();
+            returnCar(model);
+        } else {
+            std::cout << "No cars to return." << std::endl;
+        }
+    }
+
+    void accumulateFine(double amount) {
+        finesDue += amount;
+        std::cout << "Fine accumulated. Total due: $" << finesDue << std::endl;
+    }
+
+    void clearDue() {
+        finesDue = 0.0;
+        std::cout << "All dues cleared for Customer " << name << "." << std::endl;
+    }
+
+    double getFinesDue() const { return finesDue; }
+    const std::vector<std::string>& getRentedCars() const { return rentedCars; }
+};
+
+
+class Employee : public User {
+private:
+    std::vector<std::string> rentedCars;  // Models of rented cars
+    double finesDue;
+
+public:
+    // Updated constructor to include ID
+    Employee(int id, const std::string& name, const std::string& password)
+        : User(id, name, password, "employee"), finesDue(0.0) {}
+
+    void rentCar(const std::string& model) {
+        rentedCars.push_back(model);
+        std::cout << "Employee " << name << " rented car: " << model << std::endl;
+    }
+
+    void returnCar(const std::string& model) {
+        auto it = std::find(rentedCars.begin(), rentedCars.end(), model);
+        if (it != rentedCars.end()) {
+            rentedCars.erase(it);
+            std::cout << "Employee " << name << " returned car: " << model << std::endl;
+        } else {
+            std::cout << "Car not found in rented list." << std::endl;
+        }
+    }
+
+    void return_request() {
+        if (!rentedCars.empty()) {
+            // For simplicity, handling return request for the last rented car
+            std::string model = rentedCars.back();
+            returnCar(model);
+        } else {
+            std::cout << "No cars to return." << std::endl;
+        }
+    }
+
+    void accumulateFine(double amount) {
+        finesDue += amount;
+        std::cout << "Fine accumulated. Total due: $" << finesDue << std::endl;
+    }
+
+    void clearDue() {
+        finesDue = 0.0;
+        std::cout << "All dues cleared for Employee " << name << "." << std::endl;
+    }
+
+    double getFinesDue() const { return finesDue; }
+    const std::vector<std::string>& getRentedCars() const { return rentedCars; }
+};
+
+
+
+class Manager : public User {
+private:
+    CarDatabase& carDB;
+    UserDatabase& userDB;
+
+public:
+    Manager(int id, const std::string& name, const std::string& password, CarDatabase& carDB, UserDatabase& userDB)
+        : User(id, name, password, "manager"), carDB(carDB), userDB(userDB) {}
+
+    // Car Management Methods
+    void addCar(const Car& newCar) {
+        carDB.addCar(newCar);
+        std::cout << "Car added: " << newCar.getModel() << std::endl;
+    }
+
+    void updateCar(const Car& updatedCar) {
+        carDB.updateCar(updatedCar.getModel(), updatedCar);
+        std::cout << "Car updated: " << updatedCar.getModel() << std::endl;
+    }
+
+    void deleteCar(const std::string& model) {
+        carDB.deleteCar(model);
+        std::cout << "Car deleted: " << model << std::endl;
+    }
+
+    void searchCar(const std::string& model) {
+        Car car = carDB.searchCar(model);
+        if (car.getModel() != "") {
+            std::cout << "Car found: " << car.getModel() << std::endl;
+            // Display more details of the car
+        } else {
+            std::cout << "Car not found." << std::endl;
+        }
+    }
+
+    // User Management Methods
+    void addUser(const User& newUser) {
+        userDB.addUser(newUser);
+        std::cout << "User added: " << newUser.getName() << std::endl;
+    }
+
+    void updateUser(const User& updatedUser) {
+        userDB.updateUser(updatedUser.getName(), updatedUser);
+        std::cout << "User updated: " << updatedUser.getName() << std::endl;
+    }
+
+    void deleteUser(const std::string& username) {
+        userDB.deleteUser(username);
+        std::cout << "User deleted: " << username << std::endl;
+    }
+
+    void searchUser(const std::string& username) {
+        User user = userDB.searchUser(username);
+        if (user.getName() != "") {
+            std::cout << "User found: " << user.getName() << std::endl;
+            // Display more details of the user
+        } else {
+            std::cout << "User not found." << std::endl;
+        }
+    }
+
+    void modify_records() {
+        std::cout << "Modifying records..." << std::endl;
+
+        // Modify a car's details
+        Car updatedCar = getUpdatedCarDetails();
+        if (updatedCar.getModel() != "") {
+            carDB.updateCar(updatedCar.getModel(), updatedCar);
+        }
+
+        // Modify a user's details
+        User updatedUser = getUpdatedUserDetails();
+        if (updatedUser.getName() != "") {
+            userDB.updateUser(updatedUser.getName(), updatedUser);
+        }
+    }
+
+private:
+    Car getUpdatedCarDetails() {
+        std::string model;
+        double rentalPrice;
+        std::string condition;
+        
+        std::cout << "Enter the model of the car to update (or leave blank to skip): ";
+        std::getline(std::cin, model);
+        if (model.empty()) return Car();  // Return an empty car object
+
+        std::cout << "Enter the updated rental price: ";
+        std::cin >> rentalPrice;
+        std::cin.ignore();
+
+        std::cout << "Enter the updated condition: ";
+        std::getline(std::cin, condition);
+
+        return Car(model, rentalPrice, condition, true);
+    }
+
+    User getUpdatedUserDetails() {
+        std::string name, password, role;
+        int id;
+        
+        std::cout << "Enter the ID of the user to update (or 0 to skip): ";
+        std::cin >> id;
+        if (id == 0) return User();  // Return an empty user object
+        std::cin.ignore();
+
+        std::cout << "Enter the updated name: ";
+        std::getline(std::cin, name);
+
+        std::cout << "Enter the updated password: ";
+        std::getline(std::cin, password);
+
+        std::cout << "Enter the updated role: ";
+        std::getline(std::cin, role);
+
+        return User(id, name, password, role);
+    }
+};
+
+
+
+class CarDatabase {
+private:
+    std::vector<Car> cars;
+
+public:
+    CarDatabase(const std::vector<Car>& initialCars) : cars(initialCars) {}
+
+    void addCar(const Car& car) {
+        auto it = std::find_if(cars.begin(), cars.end(), [&car](const Car& c) {
+            return c.getModel() == car.getModel();
+        });
+        if (it == cars.end()) {
+            cars.push_back(car);
+            std::cout << "Car added successfully." << std::endl;
+        } else {
+            std::cout << "Car already exists." << std::endl;
+        }
+    }
+
+    void updateCar(const std::string& model, const Car& updatedCar) {
+        for (auto& car : cars) {
+            if (car.getModel() == model) {
+                car = updatedCar;
+                std::cout << "Car updated successfully." << std::endl;
+                return;
+            }
+        }
+        std::cout << "Car not found." << std::endl;
+    }
+
+    void deleteCar(const std::string& model) {
+        auto it = std::find_if(cars.begin(), cars.end(), [&model](const Car& car) {
+            return car.getModel() == model;
+        });
+        if (it != cars.end()) {
+            cars.erase(it);
+            std::cout << "Car deleted successfully." << std::endl;
+        } else {
+            std::cout << "Car not found." << std::endl;
+        }
+    }
+
+    Car searchCar(const std::string& model) const {
+        auto it = std::find_if(cars.begin(), cars.end(), [&model](const Car& car) {
+            return car.getModel() == model;
+        });
+        if (it != cars.end()) {
+            return *it;
+        } else {
+            std::cout << "Car not found." << std::endl;
+            return Car();  // Return an empty Car object
+        }
+    }
+};
+
+
+class UserDatabase {
+private:
+    std::unordered_map<std::string, User> users; // Key is the username
+
+public:
+    UserDatabase(const std::unordered_map<std::string, User>& initialUsers) : users(initialUsers) {}
+
+    void addUser(const User& user) {
+        if (users.find(user.getName()) == users.end()) {
+            users[user.getName()] = user;
+            std::cout << "User added successfully." << std::endl;
+        } else {
+            std::cout << "User already exists." << std::endl;
+        }
+    }
+
+    void updateUser(const std::string& username, const User& updatedUser) {
+        if (users.find(username) != users.end()) {
+            users[username] = updatedUser;
+            std::cout << "User updated successfully." << std::endl;
+        } else {
+            std::cout << "User not found." << std::endl;
+        }
+    }
+
+    void deleteUser(const std::string& username) {
+        if (users.erase(username)) {
+            std::cout << "User deleted successfully." << std::endl;
+        } else {
+            std::cout << "User not found." << std::endl;
+        }
+    }
+
+    User searchUser(const std::string& username) {
+        auto it = users.find(username);
+        if (it != users.end()) {
+            it->second.displayInfo();
+            return it->second;
+        } else {
+            std::cout << "User not found." << std::endl;
+            return User(); // Return an empty User object
+        }
+    }
+};
+
+
+
+    void deleteCar(const std::string& model) {
+        auto it = std::remove_if(cars.begin(), cars.end(), [&model](const Car& car) {
+            return car.getModel() == model;
+        });
+        if (it != cars.end()) {
+            cars.erase(it, cars.end());
+            std::cout << "Car deleted successfully." << std::endl;
+        } else {
+            std::cout << "Car not found." << std::endl;
+        }
+    }
+
+    void searchCar(const std::string& model) {
+        for (const auto& car : cars) {
+            if (car.getModel() == model) {
+                car.displayInfo();
+                return;
+            }
+        }
+        std::cout << "Car not found." << std::endl;
+    }
+};
+
+
+    void rentRequest() {
+        if (available) {
+            available = false;
+            dueDate = calculateDueDate(7);  // Assuming a 7-day rental period
+            std::cout << "Car " << model << " has been rented. Due date: " << dueDate << std::endl;
+        } else {
+            std::cout << "Car " << model << " is not available for rent." << std::endl;
+        }
+    }
+
+
+ void showDueDate() const {
+        if (!available) {
+            std::cout << "Car " << model << " is due back on: " << dueDate << std::endl;
+        } else {
+            std::cout << "Car " << model << " is currently available for rent." << std::endl;
+        }
+    }
+
+    std::string calculateDueDate(int rentalPeriodDays) {
+        time_t now = time(0);
+        tm *ltm = localtime(&now);
+
+        // Add rentalPeriodDays to the current date
+        ltm->tm_mday += rentalPeriodDays;
+        mktime(ltm);
+
+        // Convert the tm structure to a string date in the format yyyy-mm-dd
+        std::ostringstream oss;
+        oss << (1900 + ltm->tm_year) << "-"
+            << std::setw(2) << std::setfill('0') << (1 + ltm->tm_mon) << "-"
+            << std::setw(2) << std::setfill('0') << ltm->tm_mday;
+
+        return oss.str();
+    }
+
+};
+
+class RentalManager {
+private:
+    std::vector<Car>& cars;
+ std::unordered_map<std::string, std::string> userCarMap; // Maps user names to rented car models
+
+public:
+    RentalManager(std::vector<Car>& cars) : cars(cars) {}
+
+    void rentCarToUser(const std::string& model, const std::string& userName) {
+        for (auto& car : cars) {
+            if (car.getModel() == model && car.isAvailable()) {
+                car.setAvailable(false);
+                std::cout << "Car rented successfully to " << userName << std::endl;
+userCarMap[userName] = model; // Track the rented car
+                return;
+            }
+        }
+        std::cout << "Car not available for rent." << std::endl;
+    }
+
+    void returnCarByUser(const std::string& model, const std::string& userName) {
+        for (auto& car : cars) {
+            if (car.getModel() == model && !car.isAvailable()) {
+                car.setAvailable(true);
+                std::cout << "Car returned successfully by " << userName << std::endl;
+userCarMap.erase(userName); // Remove the tracking once the car is returned
+                return;
+            }
+        }
+        std::cout << "This car was not rented." << std::endl;
+    }
+
+      void displayRentedCars() {
+        if (userCarMap.empty()) {
+            std::cout << "No cars are currently rented." << std::endl;
+            return;
+        }
+        
+        std::cout << "Currently Rented Cars:" << std::endl;
+        for (const auto& entry : userCarMap) {
+            std::cout << "User " << entry.first << " has rented " << entry.second << std::endl;
+        }
+    }
+};
+
+class RecordManager {
+private:
+    std::string filename;
+
+public:
+    RecordManager(const std::string& filename) : filename(filename) {}
+
+    void addRecord(const std::string& record) {
+        std::ofstream file(filename, std::ios::app); // Append mode
+        if (file) {
+            file << record << std::endl;
+        } else {
+            std::cerr << "Unable to open the file for writing." << std::endl;
+        }
+    }
+
+    void viewRentalHistory() {
+        std::ifstream file(filename);
+        if (!file) {
+            std::cerr << "Unable to open the file for reading." << std::endl;
+            return;
+        }
+
+        std::cout << "Rental History:\n";
+        std::string record;
+        while (std::getline(file, record)) {
+            if (!record.empty()) {
+                std::cout << record << std::endl;
+            }
+        }
+    }
+};
+
+
+std::unordered_map<std::string, User> loadUsers();
+void registerUser(std::unordered_map<std::string, User>& users, const std::string& role);
+User loginUser(const std::unordered_map<std::string, User>& users, const std::string& role);
+
+// Function to load users from file
+std::unordered_map<std::string, User> loadUsers() {
+    std::unordered_map<std::string, User> users;
+    std::ifstream file("users.txt");
+    std::string name, password, role;
+
+    while (file >> name >> password >> role) {
+        users[name] = User(name, password, role);
+    }
+
+    return users;
+}
+
+void registerUser(std::unordered_map<std::string, User>& users, const std::string& role) {
+    if (role != "customer" && role != "employee" && role != "manager") {
+        std::cout << "Invalid role. Please start over." << std::endl;
+        return;
+    }
+
+    std::string name, password;
+    std::cout << "Enter new username: ";
+    std::cin >> name;
+    std::cout << "Enter password: ";
+    std::cin >> password;
+
+    users[name] = User(name, password, role);
+
+    // Append new user to file
+    std::ofstream file("users.txt", std::ios::app);
+    file << name << " " << password << " " << role << std::endl;
+}
+
+User loginUser(const std::unordered_map<std::string, User>& users, const std::string& role) {
+    std::string name, password;
+    std::cout << "Enter username: ";
+    std::cin >> name;
+    std::cout << "Enter password: ";
+    std::cin >> password;
+
+    auto it = users.find(name);
+    if (it != users.end() && it->second.getPassword() == password) {
+        if (it->second.getRole() != role) {
+            std::cout << "Role does not match. Please start over." << std::endl;
+            return User("", "", ""); // Return an empty user object
+        }
+        return it->second;
+    } else {
+        std::cout << "Invalid login. Please try again." << std::endl;
+        return loginUser(users, role);
+    }
+}
+
+// Function to load cars from file
+std::vector<Car> loadCars() {
+    std::vector<Car> cars;
+    std::ifstream file("cars.txt");
+    std::string model;
+    double rentalPrice;
+    bool available;
+
+    while (file >> model >> rentalPrice >> available) {
+        cars.emplace_back(model, rentalPrice, available);
+    }
+
+    return cars;
+}
+
+// Function to display all available cars
+void displayAvailableCars(const std::vector<Car>& cars) {
+    for (const auto& car : cars) {
+        if (car.isAvailable()) {
+            car.displayInfo();
+        }
+    }
+}
+
+// Function to update car availability in the cars vector and save changes to the file
+void updateCarAvailability(std::vector<Car>& cars, const std::string& model, bool available) {
+    for (auto& car : cars) {
+        if (car.getModel() == model) {
+            car.setAvailable(available);
+            break;
+        }
+    }
+
+    // Save changes to file
+    std::ofstream file("cars.txt", std::ios::trunc);
+    for (const auto& car : cars) {
+        file << car.getModel() << " " << car.getRentalPrice() << " " << car.isAvailable() << std::endl;
+    }
+}
+
+void rentCar(std::vector<Car>& cars, const std::string& model) {
+    // Find the car and rent it if available
+    for (auto& car : cars) {
+        if (car.getModel() == model && car.isAvailable()) {
+            car.setAvailable(false);
+            std::cout << "Car rented successfully: " << model << std::endl;
+// After successfully renting a car:
+    updateCarAvailability(cars, model, false);  // Set car as not available
+            return;
+        }
+    }
+    std::cout << "Car not available." << std::endl;
+ 
+}
+
+void returnCar(std::vector<Car>& cars, const std::string& model) {
+    // Find the car and mark it as available
+    for (auto& car : cars) {
+        if (car.getModel() == model && !car.isAvailable()) {
+            car.setAvailable(true);
+            std::cout << "Car returned successfully: " << model << std::endl;
+// After successfully returning a car:
+    updateCarAvailability(cars, model, true);  // Set car as available
+            return;
+        }
+    }
+    std::cout << "Car not found." << std::endl;
+
+}
+
+void runApp(User& user, std::vector<Car>& cars, RentalManager& rentalManager, RecordManager& recordManager, CarDatabase& carDB, UserDatabase& userDB) {
+    if (user.getRole() == "customer") {
+        Customer& customer = static_cast<Customer&>(user);
+        std::cout << "Customer Menu: \n1. Display Available Cars\n2. Rent a Car\n3. Return a Car\n4. View Rented Cars\n5. Clear Dues\nEnter choice: ";
+        int choice;
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1:
+                displayAvailableCars(cars);
+                break;
+            case 2: {
+                std::string model;
+                std::cout << "Enter car model to rent: ";
+                std::cin >> model;
+                rentalManager.rentCarToUser(model, customer.getName());
+                customer.rentCar(model);  // Update the customer's rented cars
+                recordManager.addRecord(customer.getName() + " rented " + model);
+                break;
+            }
+            case 3: {
+                std::string model;
+                std::cout << "Enter car model to return: ";
+                std::cin >> model;
+                rentalManager.returnCarByUser(model, customer.getName());
+                customer.returnCar(model);  // Update the customer's rented cars
+                break;
+            }
+            case 4:
+                customer.viewRentedCars();
+                break;
+            case 5:
+                customer.clearDue();
+                break;
+            default:
+                std::cout << "Invalid choice." << std::endl;
+                break;
+        }
+    } 
+    else if (user.getRole() == "employee") {
+        Employee& employee = static_cast<Employee&>(user);
+        std::cout << "Employee Menu: \n1. Display All Cars\n2. Rent a Car\n3. Return a Car\n4. View Rented Cars\n5. Clear Dues\nEnter choice: ";
+        int choice;
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1:
+                for (const auto& car : cars) {
+                    car.displayInfo();
+                }
+                break;
+            case 2: {
+                std::string model;
+                std::cout << "Enter car model to rent: ";
+                std::cin >> model;
+                rentalManager.rentCarToUser(model, employee.getName());
+                employee.rentCar(model);  // Update the employee's rented cars
+                break;
+            }
+            case 3: {
+                std::string model;
+                std::cout << "Enter car model to return: ";
+                std::cin >> model;
+                rentalManager.returnCarByUser(model, employee.getName());
+                employee.returnCar(model);  // Update the employee's rented cars
+                break;
+            }
+            case 4:
+                employee.viewRentedCars();
+                break;
+            case 5:
+                employee.clearDue();
+                break;
+            default:
+                std::cout << "Invalid choice." << std::endl;
+                break;
+        }
+    } 
+    else if (user.getRole() == "manager") {
+        Manager& manager = static_cast<Manager&>(user);
+        std::cout << "Manager Menu: \n1. Add New Car\n2. View Rental History\n3. Manage Cars\n4. Manage Users\nEnter choice: ";
+        int choice;
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1:
+                manager.addCar();
+                break;
+            case 2:
+                recordManager.viewRentalHistory();
+                break;
+            case 3:
+                manageCars(manager, carDB);
+                break;
+            case 4:
+                manageUsers(manager, userDB);
+                break;
+            default:
+                std::cout << "Invalid choice." << std::endl;
+                break;
+        }
+    }
+}
+
+void manageCars(Manager& manager, CarDatabase& carDB) {
+    std::cout << "Car Management Menu: \n1. Add Car\n2. Update Car\n3. Delete Car\n4. Search Car\nEnter choice: ";
+    int choice;
+    std::cin >> choice;
+
+    switch (choice) {
+        case 1: {
+            std::string model;
+            double price;
+            std::string condition;
+            std::cout << "Enter car model: ";
+            std::cin >> model;
+            std::cout << "Enter rental price: ";
+            std::cin >> price;
+            std::cout << "Enter condition: ";
+            std::cin >> condition;
+            Car newCar(model, price, condition, true);
+            carDB.addCar(newCar);
+            break;
+        }
+        case 2: {
+            std::string model, newModel;
+            double newPrice;
+            std::string newCondition;
+            std::cout << "Enter car model to update: ";
+            std::cin >> model;
+            std::cout << "Enter new model: ";
+            std::cin >> newModel;
+            std::cout << "Enter new rental price: ";
+            std::cin >> newPrice;
+            std::cout << "Enter new condition: ";
+            std::cin >> newCondition;
+            Car updatedCar(newModel, newPrice, newCondition, true);
+            carDB.updateCar(model, updatedCar);
+            break;
+        }
+        case 3: {
+            std::string model;
+            std::cout << "Enter car model to delete: ";
+            std::cin >> model;
+            carDB.deleteCar(model);
+            break;
+        }
+        case 4: {
+            std::string model;
+            std::cout << "Enter car model to search: ";
+            std::cin >> model;
+            carDB.searchCar(model);
+            break;
+        }
+        default:
+            std::cout << "Invalid choice." << std::endl;
+            break;
+    }
+}
+
+void manageUsers(Manager& manager, UserDatabase& userDB) {
+    std::cout << "User Management Menu: \n1. Add User\n2. Update User\n3. Delete User\n4. Search User\nEnter choice: ";
+    int choice;
+    std::cin >> choice;
+
+    switch (choice) {
+        case 1: {
+            std::string name, password, role;
+            int id;
+            std::cout << "Enter user ID: ";
+            std::cin >> id;
+            std::cout << "Enter user name: ";
+            std::cin >> name;
+            std::cout << "Enter password: ";
+            std::cin >> password;
+            std::cout << "Enter role: ";
+            std::cin >> role;
+            User newUser(id, name, password, role);
+            userDB.addUser(newUser);
+            break;
+        }
+        case 2: {
+            std::string name, newName, newPassword, newRole;
+            int newId;
+            std::cout << "Enter username to update: ";
+            std::cin >> name;
+            std::cout << "Enter new ID: ";
+            std::cin >> newId;
+            std::cout << "Enter new name: ";
+            std::cin >> newName;
+            std::cout << "Enter new password: ";
+            std::cin >> newPassword;
+            std::cout << "Enter new role: ";
+            std::cin >> newRole;
+            User updatedUser(newId, newName, newPassword, newRole);
+            userDB.updateUser(name, updatedUser);
+            break;
+        }
+        case 3: {
+            std::string username;
+            std::cout << "Enter username to delete: ";
+            std::cin >> username;
+            userDB.deleteUser(username);
+            break;
+        }
+        case 4: {
+            std::string username;
+            std::cout << "Enter username to search: ";
+            std::cin >> username;
+            userDB.searchUser(username);
+            break;
+        }
+        default:
+            std::cout << "Invalid choice." << std::endl;
+            break;
+    }
+}
+}
+
+
+int main() {
+    // Load initial data (can be from files or predefined)
+    auto initialUsers = loadUsers(); // Load users from file or predefined data
+    std::vector<Car> initialCars = loadCars(); // Load cars from file or predefined data
+
+    // Initialize databases
+    CarDatabase carDB(initialCars);
+    UserDatabase userDB(initialUsers);
+
+    // Initialize managers for rentals and records
+    RentalManager rentalManager(initialCars);
+    RecordManager recordManager("rental_records.txt");
+
+    int choice;
+    std::string role;
+
+    std::cout << "Are you a customer, employee, or manager? ";
+    std::cin >> role;
+    std::transform(role.begin(), role.end(), role.begin(), ::tolower); // Convert role to lowercase
+
+    std::cout << "1. Login\n2. Register\nEnter choice: ";
+    std::cin >> choice;
+
+    if (choice == 1) {
+        User* user = loginUser(userDB, role);
+        if (user) {
+            runApp(*user, initialCars, rentalManager, recordManager, carDB, userDB);
+        }
+    } else if (choice == 2) {
+        registerUser(userDB, role);
+    } else {
+        std::cout << "Invalid choice." << std::endl;
+    }
+
+    return 0;
+}
+
+// Note: loginUser and registerUser functions will need to be updated to interact with UserDatabase.
+
